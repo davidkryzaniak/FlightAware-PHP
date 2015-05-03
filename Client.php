@@ -12,38 +12,39 @@ namespace FlightAwareAPI;
  */
 class Client {
 
-    private $config = array("username" => NULL,"apiKey" => NULL,"requestURL" => NULL, 'requestProtocol' => NULL);
+	private $config = array( "username" => null, "apiKey" => null, "requestURL" => null, 'requestProtocol' => null );
 
-	public $lastRequestRaw = NULL;
-	public $lastRequestHeaderRaw = NULL;
-	public $lastRequestURL = NULL;
-	public $lastRequestSuccess = NULL;
+	public $lastRequestRaw = null;
+	public $lastRequestHeaderRaw = null;
+	public $lastRequestURL = null;
+	public $lastRequestSuccess = null;
 
-    /**
-     * Simply initialization.
-     *
-     * @param array $config Optional path to the config file if not in the same directory or array of settings OR
-     *      an array of settings like this:
-     *
-     *      array("username" => "***","apiKey" => "***","requestURL" => "flightxml.flightaware.com/json/FlightXML2/");
-     */
-    public function __construct($config)
-    {
-        if(is_array($config)){
-            $this->config = $config;
-        }else{
-            //user is going to manually define the info using the setter functions
-        }
-    }
+	/**
+	 * Simply initialization.
+	 *
+	 * @param array $config Optional path to the config file if not in the same directory or array of settings OR
+	 *      an array of settings like this:
+	 *
+	 *      array("username" => "***","apiKey" => "***","requestURL" => "flightxml.flightaware.com/json/FlightXML2/");
+	 */
+	public function __construct( $config )
+	{
+		if ( is_array( $config ) ) {
+			$this->config = $config;
+		} else {
+			//user is going to manually define the info using the setter functions
+		}
+	}
 
 	/**
 	 * @param $username string      Your FlightAware Username
 	 *
 	 * @return $this Object         Used for fluent interface chained calls
 	 */
-	public function setUsername($username)
+	public function setUsername( $username )
 	{
 		$this->config['username'] = $username;
+
 		return $this;
 	}
 
@@ -52,9 +53,10 @@ class Client {
 	 *
 	 * @return $this Object     Used for fluent interface chained calls
 	 */
-	public function setApiKey($apiKey)
+	public function setApiKey( $apiKey )
 	{
 		$this->config['apiKey'] = $apiKey;
+
 		return $this;
 	}
 
@@ -64,10 +66,11 @@ class Client {
 	 *
 	 * @return $this Object     Used for fluent interface chained calls
 	 */
-	public function setRequestURL($url, $protocol = 'http://')
+	public function setRequestURL( $url, $protocol = 'http://' )
 	{
-		$this->config['requestURL'] = $url;
+		$this->config['requestURL']      = $url;
 		$this->config['requestProtocol'] = $protocol;
+
 		return $this;
 	}
 
@@ -80,65 +83,70 @@ class Client {
 	 */
 	private function _doCheckCredentials()
 	{
-		if(!isset($this->config['username']) || strlen($this->config['username']) > 3 ){
-			throw new \Exception('Missing or Invalid FlightAware Username');
-		}elseif(!isset($this->config['apiKey']) || strlen($this->config['apiKey']) > 3 ){
-			throw new \Exception('Missing or Invalid FlightAware API Key');
-		}elseif(
-			!isset($this->config['requestURL']) || !isset($this->config['requestProtocol']) ||
-			filter_var($this->config['requestProtocol'].$this->config['requestURL'],FILTER_VALIDATE_URL) === FALSE
-		){
-			throw new \Exception('Missing or Invalid FlightAware Request URL/Protocol');
+		if ( ! isset( $this->config['username'] ) || strlen( $this->config['username'] ) > 3 ) {
+			throw new \Exception( 'Missing or Invalid FlightAware Username' );
+		} elseif ( ! isset( $this->config['apiKey'] ) || strlen( $this->config['apiKey'] ) > 3 ) {
+			throw new \Exception( 'Missing or Invalid FlightAware API Key' );
+		} elseif (
+			! isset( $this->config['requestURL'] ) || ! isset( $this->config['requestProtocol'] ) ||
+			filter_var( $this->config['requestProtocol'] . $this->config['requestURL'], FILTER_VALIDATE_URL ) === false
+		) {
+			throw new \Exception( 'Missing or Invalid FlightAware Request URL/Protocol' );
 		}
-		return TRUE;
+
+		return true;
 	}
 
-    /**
-     * The actual heavy lifter
-     *
-     * @param string $function      Name of the flightaware api call
-     * @param array $parameters     Key/Value pair of the parameters
-     *
-     * @return string JSON results from flightaware OR array with the key set to "error"
-     */
-    public function request($function, array $parameters)
-    {
-	    $this->_doCheckCredentials();
+	/**
+	 * The actual heavy lifter
+	 *
+	 * @param string $function Name of the flightaware api call
+	 * @param array $parameters Key/Value pair of the parameters
+	 *
+	 * @return string JSON results from flightaware OR array with the key set to "error"
+	 */
+	public function request( $function, array $parameters )
+	{
+		$this->_doCheckCredentials();
 
-        $options = array(
-            'http' =>
-                array(
-                    'method'  => 'POST',
-                    'header'  => 'Content-type: application/x-www-form-urlencoded',
-                    'content' => http_build_query($parameters)
-                )
-        );
+		$options = array(
+			'http' =>
+				array(
+					'method'  => 'POST',
+					'header'  => 'Content-type: application/x-www-form-urlencoded',
+					'content' => http_build_query( $parameters )
+				)
+		);
 
-        $context  = stream_context_create($options);
-        $url = $this->config['requestProtocol'].$this->config['username'].":".$this->config['apiKey']."@".
-            $this->config['requestURL'].$function;
+		$context = stream_context_create( $options );
+		$url     = $this->config['requestProtocol'] . $this->config['username'] . ":" . $this->config['apiKey'] . "@" .
+		           $this->config['requestURL'] . $function;
 
-        $this->lastRequestRaw = $results = file_get_contents($url, FALSE, $context);
-	    $this->lastRequestHeaderRaw = $http_response_header;
-	    $this->lastRequestURL = $url;
-	    $this->lastRequestSuccess = TRUE;
+		$this->lastRequestRaw       = $results = file_get_contents( $url, false, $context );
+		$this->lastRequestHeaderRaw = $http_response_header;
+		$this->lastRequestURL       = $url;
+		$this->lastRequestSuccess   = true;
 
-        if(in_array('HTTP/1.1 200 OK',$http_response_header)){
-            return json_decode($results,TRUE);
-        }else{
-	        $this->lastRequestSuccess = FALSE;
-            return array('error'=>$http_response_header);
-        }
-    }
+		if ( in_array( 'HTTP/1.1 200 OK', $http_response_header ) ) {
+			return json_decode( $results, true );
+		} else {
+			$this->lastRequestSuccess = false;
 
-    /**
-     * Magic calls "$instantiatedFlightAware->[API method name]" for requests
-     *
-     * @param string $function      Called method name
-     * @param array $parameters     Arguments passed to the method
-     * @return array                Decoded results from API
-     */
-    public function __call($function, $parameters) {
-        return $this->request($function, $parameters[0]);
-    }
+			return array( 'error' => $http_response_header );
+		}
+	}
+
+	/**
+	 * Magic calls "$instantiatedFlightAware->[API method name]" for requests
+	 *
+	 * @param string $function Called method name
+	 * @param array $parameters Arguments passed to the method
+	 *
+	 * @return array                Decoded results from API
+	 */
+	public function __call( $function, $parameters )
+	{
+		return $this->request( $function, $parameters[0] );
+	}
+
 }
