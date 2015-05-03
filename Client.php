@@ -22,10 +22,10 @@ class Client {
     /**
      * Simply initialization.
      *
-     * @param mixed $ini    Optional path to the config file if not in the same directory or array of settings OR
-     *                      an array of settings like this:
+     * @param array $config Optional path to the config file if not in the same directory or array of settings OR
+     *      an array of settings like this:
      *
-     * array("username" => "","apiKey" => "","requestURL" => "flightxml.flightaware.com/json/FlightXML2/");
+     *      array("username" => "***","apiKey" => "***","requestURL" => "flightxml.flightaware.com/json/FlightXML2/");
      */
     public function __construct($config)
     {
@@ -37,11 +37,11 @@ class Client {
     }
 
 	/**
-	 * @param $username string    Your FlightAware Username
+	 * @param $username string      Your FlightAware Username
 	 *
-	 *
+	 * @return $this Object         Used for fluent interface chained calls
 	 */
-	 public function setUsername($username)
+	public function setUsername($username)
 	{
 		$this->config['username'] = $username;
 		return $this;
